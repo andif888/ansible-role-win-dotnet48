@@ -1,0 +1,10 @@
+---
+# defaults file for ansible-role-win-dotnet48
+
+# dotnet48_download_url: https://go.microsoft.com/fwlink/?linkid=2088631
+# dotnet48_install_file: ndp48-x86-x64-allos-enu.exe
+
+dotnet48_download_url: http://go.microsoft.com/fwlink/?LinkId=2085155
+dotnet48_install_file: ndp48-web.exe
+
+dotnet48_optimize_assemblies: true
