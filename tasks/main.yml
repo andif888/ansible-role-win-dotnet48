@@ -1,43 +1,45 @@
 ---
 # tasks file for ansible-role-win-dotnet48
-- name: ansible-role-win-dotnet48 - Check installed
-  win_reg_stat:
+- name: Check installed
+  ansible.windows.win_reg_stat:
     path: HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full
     name: Release
   register: dotnet48_release
 
-- debug:
+- name: Debug dotnet48_release.exists
+  ansible.builtin.debug:
     var: dotnet48_release.exists
 
-- debug:
+- name: Debug dotnet48_release.value
+  ansible.builtin.debug:
     var: dotnet48_release.value
 
-- name: ansible-role-win-dotnet48 - Download 
-  win_get_url:
+- name: Download
+  ansible.windows.win_get_url:
     url: '{{ dotnet48_download_url }}'
     dest: 'C:\Windows\Temp\{{ dotnet48_install_file }}'
+    validate_certs: '{{ dotnet48_download_validate_certs }}'
     force: no
   when: dotnet48_release.value|int < 528049
-  
-- name: ansible-role-win-dotnet48 - Install
-  win_package:
+
+- name: Install
+  ansible.windows.win_package:
     path: 'C:\Windows\Temp\{{ dotnet48_install_file }}'
     arguments: /q /norestart
-    product_id: '{F39E5132-620C-4978-AE0C-F925D685E5E6}'
-    state: present 
+    state: present
   register: dotnet48_install
   when: dotnet48_release.value|int < 528049
 
-- name: ansible-role-win-dotnet48 - Reboot when required
-  win_reboot:
+- name: Reboot when required
+  ansible.windows.win_reboot:
   register: has_rebooted
   when:
     - dotnet48_release.value|int < 528049
     - dotnet48_install is defined
     - dotnet48_install.reboot_required
 
-- name: ansible-role-win-dotnet48 - Optimize-PowershellAssemblies
-  win_shell: |
+- name: Optimize-PowershellAssemblies
+  ansible.windows.win_shell: |
     $old_path = $env:path
     try {
       $env:path = [Runtime.InteropServices.RuntimeEnvironment]::GetRuntimeDirectory()
@@ -55,4 +57,3 @@
   when: 
     - has_rebooted.rebooted |default(false)
     - dotnet48_optimize_assemblies |bool
-
